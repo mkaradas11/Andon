@@ -2,44 +2,53 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>XML Veri Gösterimi</title>
+  <title>KPI (XML)</title>
+  <meta http-equiv="Cache-Control" content="no-store" />
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    #data { margin-top: 20px; padding: 10px; border: 1px solid #ddd; display: inline-block; }
+    body { font-family: Arial, sans-serif; text-align:center; margin:40px 12px; }
+    #data { margin-top: 16px; padding: 12px; border: 1px solid #ddd; display:inline-block; max-width: 95vw; text-align:left; white-space: pre-wrap; }
+    .err { color: #b00020; }
   </style>
 </head>
 <body>
-  <h1>XML Verisi</h1>
-  <div id="data">Veri yükleniyor...</div>
+  <h1>Pres KPI</h1>
+  <div id="data">Veri yükleniyor…</div>
 
   <script>
+    const XML_URL = "http://192.168.42.34:2700/drk15/BIOnlineKPI/11";
+    const USER = "admin";
+    const PASS = "salla";
+
     async function getXML() {
       try {
-        // XML kaynağının URL'sini buraya yaz (örnek bir XML linki ekliyorum)
-        const response = await fetch("http://192.168.42.34:2700/drk15/BIOnlineKPI/11");
-        const text = await response.text();
+        const auth = 'Basic ' + btoa(`${USER}:${PASS}`);
+        const res = await fetch(XML_URL + `?t=${Date.now()}`, {
+          method: 'GET',
+          headers: { 'Authorization': auth },
+          cache: 'no-store',
+        });
 
-        // XML'i parse et
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(text, "application/xml");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        // Örnek: XML içinden <to> ve <body> etiketlerini al
-        const to = xmlDoc.getElementsByTagName("to")[0].textContent;
-        const body = xmlDoc.getElementsByTagName("body")[0].textContent;
+        const text = await res.text();
+        const xml = new DOMParser().parseFromString(text, 'application/xml');
 
-        // Ekrana yazdır
-        document.getElementById("data").innerHTML = `
-          <b>Alıcı:</b> ${to}<br>
-          <b>Mesaj:</b> ${body}
-        `;
-      } catch (error) {
-        document.getElementById("data").innerText = "XML okunamadı: " + error;
+        // Örnek: tag isimlerini bilmediğimiz için önce başlığı yazalım, sonra ham XML’i gösterelim
+        // İstersen belirli tag’ları söyle, onları seçip tablo yapalım.
+        const maybeErr = xml.getElementsByTagName('parsererror')[0];
+        if (maybeErr) throw new Error('Geçersiz XML veya CORS bloklandı');
+
+        // Burayı kendi XML şemanına göre özelleştirebiliriz:
+        // const val = xml.getElementsByTagName('SomeTag')[0]?.textContent ?? '';
+
+        document.getElementById('data').textContent = text; // şimdilik ham XML gösteriyoruz
+      } catch (e) {
+        document.getElementById('data').innerHTML = `<span class="err">XML okunamadı: ${e}</span>`;
+        console.error(e);
       }
     }
 
-    // İlk çalıştırma
     getXML();
-    // 5 saniyede bir güncelle
     setInterval(getXML, 5000);
   </script>
 </body>
