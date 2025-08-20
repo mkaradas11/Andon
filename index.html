@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>XML Veri Gösterimi</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
@@ -13,33 +13,33 @@
   <div id="data">Veri yükleniyor...</div>
 
   <script>
-    const XML_URL = "https://www.w3schools.com/xml/note.xml";
-    const PROXY = "https://api.allorigins.win/raw?url="; // CORS geçidi
-
     async function getXML() {
       try {
-        // cache'i kırmak için zaman damgası ekliyoruz
-        const url = PROXY + encodeURIComponent(XML_URL) + "&t=" + Date.now();
-        const response = await fetch(url, { cache: "no-store" });
+        // XML kaynağının URL'sini buraya yaz (örnek bir XML linki ekliyorum)
+        const response = await fetch("http://192.168.42.34:2700/drk15/BIOnlineKPI/11");
         const text = await response.text();
 
+        // XML'i parse et
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(text, "application/xml");
 
-        const to = xmlDoc.getElementsByTagName("to")[0]?.textContent ?? "(yok)";
-        const body = xmlDoc.getElementsByTagName("body")[0]?.textContent ?? "(yok)";
+        // Örnek: XML içinden <to> ve <body> etiketlerini al
+        const to = xmlDoc.getElementsByTagName("to")[0].textContent;
+        const body = xmlDoc.getElementsByTagName("body")[0].textContent;
 
+        // Ekrana yazdır
         document.getElementById("data").innerHTML = `
           <b>Alıcı:</b> ${to}<br>
           <b>Mesaj:</b> ${body}
         `;
-      } catch (err) {
-        document.getElementById("data").innerText = "XML okunamadı: " + err;
-        console.error(err);
+      } catch (error) {
+        document.getElementById("data").innerText = "XML okunamadı: " + error;
       }
     }
 
+    // İlk çalıştırma
     getXML();
+    // 5 saniyede bir güncelle
     setInterval(getXML, 5000);
   </script>
 </body>
