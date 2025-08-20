@@ -2,10 +2,45 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Benim Web Sitem</title>
+  <title>XML Veri Gösterimi</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    #data { margin-top: 20px; padding: 10px; border: 1px solid #ddd; display: inline-block; }
+  </style>
 </head>
 <body>
-  <h1>Merhaba!</h1>
-  <p>Bu site GitHub Pages kullanılarak yayınlandı 🚀</p>
+  <h1>XML Verisi</h1>
+  <div id="data">Veri yükleniyor...</div>
+
+  <script>
+    async function getXML() {
+      try {
+        // XML kaynağının URL'sini buraya yaz (örnek bir XML linki ekliyorum)
+        const response = await fetch("https://www.w3schools.com/xml/note.xml");
+        const text = await response.text();
+
+        // XML'i parse et
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(text, "application/xml");
+
+        // Örnek: XML içinden <to> ve <body> etiketlerini al
+        const to = xmlDoc.getElementsByTagName("to")[0].textContent;
+        const body = xmlDoc.getElementsByTagName("body")[0].textContent;
+
+        // Ekrana yazdır
+        document.getElementById("data").innerHTML = `
+          <b>Alıcı:</b> ${to}<br>
+          <b>Mesaj:</b> ${body}
+        `;
+      } catch (error) {
+        document.getElementById("data").innerText = "XML okunamadı: " + error;
+      }
+    }
+
+    // İlk çalıştırma
+    getXML();
+    // 5 saniyede bir güncelle
+    setInterval(getXML, 5000);
+  </script>
 </body>
 </html>
