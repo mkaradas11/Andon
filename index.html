@@ -2,54 +2,43 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>KPI (XML)</title>
-  <meta http-equiv="Cache-Control" content="no-store" />
+  <title>KPI Görüntüleme</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align:center; margin:40px 12px; }
-    #data { margin-top: 16px; padding: 12px; border: 1px solid #ddd; display:inline-block; max-width: 95vw; text-align:left; white-space: pre-wrap; }
-    .err { color: #b00020; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    #data { width: 100%; height: 100vh; border: none; }
   </style>
 </head>
 <body>
-  <h1>Pres KPI</h1>
-  <div id="data">Veri yükleniyor…</div>
+  <iframe id="data"></iframe>
 
   <script>
     const XML_URL = "http://192.168.42.34:2700/drk15/BIOnlineKPI/11";
     const USER = "admin";
     const PASS = "salla";
 
-    async function getXML() {
+    async function loadHTML() {
       try {
         const auth = 'Basic ' + btoa(`${USER}:${PASS}`);
-        const res = await fetch(XML_URL + `?t=${Date.now()}`, {
-          method: 'GET',
-          headers: { 'Authorization': auth },
-          cache: 'no-store',
+        const res = await fetch(XML_URL + "?t=" + Date.now(), {
+          headers: { "Authorization": auth },
+          cache: "no-store"
         });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) throw new Error("HTTP " + res.status);
 
         const text = await res.text();
-        const xml = new DOMParser().parseFromString(text, 'application/xml');
-
-        // Örnek: tag isimlerini bilmediğimiz için önce başlığı yazalım, sonra ham XML’i gösterelim
-        // İstersen belirli tag’ları söyle, onları seçip tablo yapalım.
-        const maybeErr = xml.getElementsByTagName('parsererror')[0];
-        if (maybeErr) throw new Error('Geçersiz XML veya CORS bloklandı');
-
-        // Burayı kendi XML şemanına göre özelleştirebiliriz:
-        // const val = xml.getElementsByTagName('SomeTag')[0]?.textContent ?? '';
-
-        document.getElementById('data').textContent = text; // şimdilik ham XML gösteriyoruz
+        // İçeriği iframe içine yaz
+        const iframe = document.getElementById("data");
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write(text);
+        doc.close();
       } catch (e) {
-        document.getElementById('data').innerHTML = `<span class="err">XML okunamadı: ${e}</span>`;
-        console.error(e);
+        document.body.innerHTML = "<p style='color:red'>İçerik alınamadı: " + e + "</p>";
       }
     }
 
-    getXML();
-    setInterval(getXML, 5000);
+    loadHTML();
+    setInterval(loadHTML, 5000);
   </script>
 </body>
 </html>
