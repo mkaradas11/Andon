@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const url = 'http://192.168.x.x/path'; // Replace with the actual path
+    const url = 'http://192.168.42.34:2700/drk15/BIOnlineKPI/11'; // Replace with the actual path
+
     const username = 'admin';
     const password = 'salla';
 
